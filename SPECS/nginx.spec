@@ -56,7 +56,7 @@
 Name:              nginx
 Epoch:             1
 Version:           1.22.1
-Release:           3%{?dist}
+Release:           5%{?dist}
 
 Summary:           A high performance web server and reverse proxy server
 # BSD License (two clause)
@@ -78,6 +78,7 @@ Source13:          nginx-upgrade
 Source14:          nginx-upgrade.8
 Source15:          macros.nginxmods.in
 Source16:          nginxmods.attr
+Source17:          nginx-ssl-pass-dialog
 Source102:         nginx-logo.png
 Source103:         404.html
 Source104:         50x.html
@@ -103,6 +104,15 @@ Patch4:            0005-Init-openssl-engine-properly.patch
 
 # downstream patch for RHEL - https://bugzilla.redhat.com/show_bug.cgi?id=2028781
 Patch5:            0007-Enable-TLSv1.3-by-default.patch
+
+# downstream patch - Add ssl-pass-phrase-dialog helper script for
+# encrypted private keys with pass phrase decryption
+#
+# https://bugzilla.redhat.com/show_bug.cgi?id=2170808
+Patch6:            0008-add-ssl-pass-phrase-dialog.patch
+
+# security fix - https://issues.redhat.com/browse/RHEL-12736
+Patch7:            0009-CVE-2023-44487-HTTP-2-per-iteration-stream-handling.patch
 
 BuildRequires:     make
 BuildRequires:     gcc
@@ -466,6 +476,10 @@ sed -e "s|@@NGINX_ABIVERSION@@|%{nginx_abiversion}|g" \
 ## Install dependency generator
 install -Dpm0644 -t %{buildroot}%{_fileattrsdir} %{SOURCE16}
 
+# install http-ssl-pass-dialog
+mkdir -p $RPM_BUILD_ROOT%{_libexecdir}
+install -m755 $RPM_SOURCE_DIR/nginx-ssl-pass-dialog \
+        $RPM_BUILD_ROOT%{_libexecdir}/nginx-ssl-pass-dialog
 
 
 %pre filesystem
@@ -533,6 +547,7 @@ fi
 %{_mandir}/man8/nginx.8*
 %{_mandir}/man8/nginx-upgrade.8*
 %{_unitdir}/nginx.service
+%{_libexecdir}/nginx-ssl-pass-dialog
 
 %files core
 %license LICENSE
@@ -611,6 +626,16 @@ fi
 
 
 %changelog
+* Mon Oct 17 2023 Luboš Uhliarik <luhliari@redhat.com> - 1:1.22.1-5
+- Resolves: RHEL-12736 - nginx:1.22/nginx: HTTP/2: Multiple HTTP/2 enabled web
+  servers are vulnerable to a DDoS attack (Rapid Reset Attack) (CVE-2023-44487)
+
+* Mon Aug 07 2023 Luboš Uhliarik <luhliari@redhat.com> - 1:1.22.1-4
+- Resolves: #2170808 - Running nginx with systemctl and entering ssl
+  private key's pass phrase
+- added new ssl_pass_phrase_dialog directive which enables setting
+  external program for entering password for encrypted private key
+
 * Sun Dec 18 2022 Luboš Uhliarik <luhliari@redhat.com> - 1:1.22.1-3
 - Resolves: #2150932 - No logrotating nginx logs from nginx:1.22
 
