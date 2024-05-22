@@ -1,0 +1,6 @@
+#!/bin/sh
+
+# Generate Requires: nginx(abi) = VERSION
+echo "nginx(abi) = $(rpm --eval '%{_nginx_abiversion}')"
+
+exit 0

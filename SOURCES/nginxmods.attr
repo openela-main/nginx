@@ -1,0 +1,2 @@
+%__nginxmods_requires %{_rpmconfigdir}/nginxmods.req
+%__nginxmods_path ^%{_prefix}/lib(64)?/nginx/modules/.*\\.so$
