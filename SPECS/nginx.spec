@@ -56,7 +56,7 @@
 Name:              nginx
 Epoch:             1
 Version:           1.24.0
-Release:           1%{?dist}
+Release:           1%{?dist}.1
 
 Summary:           A high performance web server and reverse proxy server
 # BSD License (two clause)
@@ -626,6 +626,9 @@ fi
 
 
 %changelog
+* Wed May 29 2024 Luboš Uhliarik <luhliari@redhat.com> - 1:1.24.0-1.1
+- Resolves: RHEL-39333 - Nginx seg faults when proxy_ssl_certificate is set
+
 * Thu Jan 18 2024 Luboš Uhliarik <luhliari@redhat.com> - 1:1.24.0-1
 - new version 1.24.0
 
