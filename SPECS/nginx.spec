@@ -7,12 +7,12 @@
 
 %bcond_with geoip
 
-# nginx gperftools support should be disabled for RHEL >= 8
+# nginx gperftools support should be dissabled for RHEL >= 8
 # see: https://bugzilla.redhat.com/show_bug.cgi?id=1931402
 %if 0%{?rhel} >= 8
 %global with_gperftools 0
 %else
-# gperftools exists only on selected arches
+# gperftools exist only on selected arches
 # gperftools *detection* is failing on ppc64*, possibly only configure
 # bug, but disable anyway.
 %ifnarch s390 s390x ppc64 ppc64le
@@ -24,21 +24,6 @@
 
 %if 0%{?fedora} > 22
 %global with_mailcap_mimetypes 1
-%endif
-
-# kTLS requires OpenSSL 3.0 (default in F36+ and EL9+, available in EPEL8)
-%if 0%{?fedora} >= 36 || 0%{?rhel} >= 8
-%global with_ktls 1
-%endif
-
-# Build against OpenSSL 1.1 on EL7
-%if 0%{?rhel} == 7
-%global openssl_pkgversion 11
-%endif
-
-# Build against OpenSSL 3 on EL8
-%if 0%{?rhel} == 8
-%global openssl_pkgversion 3
 %endif
 
 # Cf. https://www.nginx.com/blog/creating-installable-packages-dynamic-modules/
@@ -54,9 +39,9 @@
 
 
 Name:              nginx
-Epoch:             1
-Version:           1.22.1
-Release:           5%{?dist}
+Epoch:             2
+Version:           1.20.1
+Release:           20%{?dist}
 
 Summary:           A high performance web server and reverse proxy server
 # BSD License (two clause)
@@ -70,7 +55,6 @@ Source1:           https://nginx.org/download/nginx-%{version}.tar.gz.asc
 Source2:           https://nginx.org/keys/maxim.key
 Source3:           https://nginx.org/keys/mdounin.key
 Source4:           https://nginx.org/keys/sb.key
-Source5:           https://nginx.org/keys/thresh.key
 Source10:          nginx.service
 Source11:          nginx.logrotate
 Source12:          nginx.conf
@@ -78,7 +62,6 @@ Source13:          nginx-upgrade
 Source14:          nginx-upgrade.8
 Source15:          macros.nginxmods.in
 Source16:          nginxmods.attr
-Source17:          nginx-ssl-pass-dialog
 Source102:         nginx-logo.png
 Source103:         404.html
 Source104:         50x.html
@@ -102,17 +85,20 @@ Patch3:            0004-Set-proper-compiler-optimalization-level-O2-for-perl.pat
 # downstream patch for RHEL - https://bugzilla.redhat.com/show_bug.cgi?id=2006420
 Patch4:            0005-Init-openssl-engine-properly.patch
 
+# upstream patch - fixing ALPACA(CVE-2021-3618) security issue - https://bugzilla.redhat.com/show_bug.cgi?id=1975623
+Patch5:            0006-Fix-ALPACA-security-issue.patch
+
 # downstream patch for RHEL - https://bugzilla.redhat.com/show_bug.cgi?id=2028781
-Patch5:            0007-Enable-TLSv1.3-by-default.patch
+Patch6:            0007-Enable-TLSv1.3-by-default.patch
 
-# downstream patch - Add ssl-pass-phrase-dialog helper script for
-# encrypted private keys with pass phrase decryption
-#
-# https://bugzilla.redhat.com/show_bug.cgi?id=2170808
-Patch6:            0008-add-ssl-pass-phrase-dialog.patch
+# security patch - https://issues.redhat.com/browse/RHEL-12518
+Patch7:            0008-CVE-2023-44487-HTTP-2-per-iteration-stream-handling.patch
 
-# security fix - https://issues.redhat.com/browse/RHEL-12736
-Patch7:            0009-CVE-2023-44487-HTTP-2-per-iteration-stream-handling.patch
+# downstream patch for RHEL - https://issues.redhat.com/browse/RHEL-40371
+Patch8:            0009-defer-ENGINE_finish-calls-to-a-cleanup.patch
+
+# upstream patch - https://issues.redhat.com/browse/RHEL-40075
+Patch9:            0010-Optimized-chain-link-usage.patch
 
 BuildRequires:     make
 BuildRequires:     gcc
@@ -120,8 +106,12 @@ BuildRequires:     gnupg2
 %if 0%{?with_gperftools}
 BuildRequires:     gperftools-devel
 %endif
-BuildRequires:     openssl%{?openssl_pkgversion}-devel
-BuildRequires:     pcre2-devel
+%if 0%{?fedora} || 0%{?rhel} >= 8
+BuildRequires:     openssl-devel
+%else
+BuildRequires:     openssl11-devel
+%endif
+BuildRequires:     pcre-devel
 BuildRequires:     zlib-devel
 
 Requires:          nginx-filesystem = %{epoch}:%{version}-%{release}
@@ -136,6 +126,7 @@ Obsoletes:         nginx-mod-http-geoip <= 1:1.16
 Requires:          system-logos-httpd
 %endif
 
+Requires:          pcre
 Provides:          webserver
 %if 0%{?fedora} || 0%{?rhel} >= 8
 Recommends:        logrotate
@@ -159,7 +150,7 @@ Summary: nginx minimal core
 %if 0%{?with_mailcap_mimetypes}
 Requires:          nginx-mimetypes
 %endif
-Requires:          openssl%{?openssl_pkgversion}-libs
+Requires:          openssl-libs
 Requires(pre):     nginx-filesystem
 Conflicts:         nginx < 1:1.20.1-13
 
@@ -261,8 +252,12 @@ Requires:          gperftools-devel
 Requires:          GeoIP-devel
 %endif
 Requires:          libxslt-devel
-Requires:          openssl%{?openssl_pkgversion}-devel
-Requires:          pcre2-devel
+%if 0%{?fedora} || 0%{?rhel} >= 8
+Requires:          openssl-devel
+%else
+Requires:          openssl11-devel
+%endif
+Requires:          pcre-devel
 Requires:          perl-devel
 Requires:          perl(ExtUtils::Embed)
 Requires:          zlib-devel
@@ -273,7 +268,7 @@ Requires:          zlib-devel
 
 %prep
 # Combine all keys from upstream into one file
-cat %{S:2} %{S:3} %{S:4} %{S:5} > %{_builddir}/%{name}.gpg
+cat %{S:2} %{S:3} %{S:4} > %{_builddir}/%{name}.gpg
 %{gpgverify} --keyring='%{_builddir}/%{name}.gpg' --signature='%{SOURCE1}' --data='%{SOURCE0}'
 %autosetup -p1
 cp %{SOURCE200} %{SOURCE210} %{SOURCE10} %{SOURCE12} .
@@ -283,10 +278,10 @@ sed -i -e 's#KillMode=.*#KillMode=process#g' nginx.service
 sed -i -e 's#PROFILE=SYSTEM#HIGH:!aNULL:!MD5#' nginx.conf
 %endif
 
-%if 0%{?openssl_pkgversion}
+%if 0%{?rhel} == 7
 sed \
-  -e 's|\(ngx_feature_path=\)$|\1%{_includedir}/openssl%{openssl_pkgversion}|' \
-  -e 's|\(ngx_feature_libs="\)|\1-L%{_libdir}/openssl%{openssl_pkgversion} |' \
+  -e 's|\(ngx_feature_path=\)$|\1%{_includedir}/openssl11|' \
+  -e 's|\(ngx_feature_libs="\)|\1-L%{_libdir}/openssl11 |' \
   -i auto/lib/openssl/conf
 %endif
 
@@ -334,7 +329,6 @@ if ! ./configure \
     --with-http_flv_module \
 %if %{with geoip}
     --with-http_geoip_module=dynamic \
-    --with-stream_geoip_module=dynamic \
 %endif
     --with-http_gunzip_module \
     --with-http_gzip_static_module \
@@ -352,17 +346,13 @@ if ! ./configure \
     --with-http_xslt_module=dynamic \
     --with-mail=dynamic \
     --with-mail_ssl_module \
-%if 0%{?with_ktls}
-    --with-openssl-opt=enable-ktls \
-%endif
     --with-pcre \
     --with-pcre-jit \
     --with-stream=dynamic \
-    --with-stream_realip_module \
     --with-stream_ssl_module \
     --with-stream_ssl_preread_module \
     --with-threads \
-    --with-cc-opt="%{optflags} $(pcre2-config --cflags)" \
+    --with-cc-opt="%{optflags} $(pcre-config --cflags)" \
     --with-ld-opt="$nginx_ldopts"; then
   : configure failed
   cat objs/autoconf.err
@@ -476,10 +466,6 @@ sed -e "s|@@NGINX_ABIVERSION@@|%{nginx_abiversion}|g" \
 ## Install dependency generator
 install -Dpm0644 -t %{buildroot}%{_fileattrsdir} %{SOURCE16}
 
-# install http-ssl-pass-dialog
-mkdir -p $RPM_BUILD_ROOT%{_libexecdir}
-install -m755 $RPM_SOURCE_DIR/nginx-ssl-pass-dialog \
-        $RPM_BUILD_ROOT%{_libexecdir}/nginx-ssl-pass-dialog
 
 
 %pre filesystem
@@ -547,7 +533,6 @@ fi
 %{_mandir}/man8/nginx.8*
 %{_mandir}/man8/nginx-upgrade.8*
 %{_unitdir}/nginx.service
-%{_libexecdir}/nginx-ssl-pass-dialog
 
 %files core
 %license LICENSE
@@ -626,28 +611,23 @@ fi
 
 
 %changelog
-* Mon Oct 17 2023 Luboš Uhliarik <luhliari@redhat.com> - 1:1.22.1-5
-- Resolves: RHEL-12736 - nginx:1.22/nginx: HTTP/2: Multiple HTTP/2 enabled web
-  servers are vulnerable to a DDoS attack (Rapid Reset Attack) (CVE-2023-44487)
+* Mon Jul 15 2024 Luboš Uhliarik <luhliari@redhat.com> - 2:1.20.1-20
+- Resolves: RHEL-40075 - nginx worker processes memory leak
 
-* Mon Aug 07 2023 Luboš Uhliarik <luhliari@redhat.com> - 1:1.22.1-4
-- Resolves: #2170808 - Running nginx with systemctl and entering ssl
-  private key's pass phrase
-- added new ssl_pass_phrase_dialog directive which enables setting
-  external program for entering password for encrypted private key
+* Mon Jun 10 2024 Luboš Uhliarik <luhliari@redhat.com> - 1:1.20.1-19
+- Resolves: RHEL-40371- openssl 3.2 ENGINE regression
 
-* Sun Dec 18 2022 Luboš Uhliarik <luhliari@redhat.com> - 1:1.22.1-3
-- Resolves: #2150932 - No logrotating nginx logs from nginx:1.22
+* Thu May 30 2024 Luboš Uhliarik <luhliari@redhat.com> - 2:1.20.1-17
+- bump package epoch to resolve RHEL-33939
+- Resolves: RHEL-33939 - Update path for nginx broken for existing CS
+  installations
 
-* Thu Dec 01 2022 Neal Gompa <ngompa@datto.com> - 1:1.22.1-2
-- Require pcre2-devel instead of pcre-devel in -mod-devel subpackage
-  Resolves: rhbz#2149965
+* Mon Oct 16 2023 Luboš Uhliarik <luhliari@redhat.com> - 1:1.20.1-16
+- Resolves: RHEL-12518 - nginx: HTTP/2: Multiple HTTP/2 enabled web servers are
+  vulnerable to a DDoS attack (Rapid Reset Attack) (CVE-2023-44487)
 
-* Sat Oct 22 2022 Luboš Uhliarik <luhliari@redhat.com> - 1:1.22.1-1
-- Resolves: #2096174 - RFE: add nginx:1.22 module stream
-- switch to pcre2
-- add stream_geoip_module and stream_realip_module
-- enable kTLS support
+* Thu Nov 24 2022 Luboš Uhliarik <luhliari@redhat.com> - 1:1.20.1-14
+- Resolves: #2086527 - Fix logrotate config and nginx log dir permissions
 
 * Wed Jun 22 2022 Luboš Uhliarik <luhliari@redhat.com> - 1:1.20.1-13
 - Resolves: #2099752 - nginx minimisation for ubi-micro
