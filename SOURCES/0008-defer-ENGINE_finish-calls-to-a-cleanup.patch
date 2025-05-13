@@ -1,0 +1,126 @@
+From 34797d13970bc9260228d1198c7c8904193340fe Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Lubo=C5=A1=20Uhliarik?= <luhliari@redhat.com>
+Date: Mon, 20 Jan 2025 13:13:44 +0100
+Subject: [PATCH] defer ENGINE_finish() calls to a cleanup
+
+---
+ src/event/ngx_event_openssl.c | 51 +++++++++++++++++++++++++++--------
+ 1 file changed, 40 insertions(+), 11 deletions(-)
+
+diff --git a/src/event/ngx_event_openssl.c b/src/event/ngx_event_openssl.c
+index 13f6fd2..e36e073 100644
+--- a/src/event/ngx_event_openssl.c
++++ b/src/event/ngx_event_openssl.c
+@@ -18,7 +18,7 @@ typedef struct {
+     ngx_uint_t  engine;   /* unsigned  engine:1; */
+ } ngx_openssl_conf_t;
+ 
+-
++static ngx_int_t ngx_ssl_engine_cleanup(void *data);
+ static X509 *ngx_ssl_load_certificate(ngx_pool_t *pool, char **err,
+     ngx_str_t *cert, STACK_OF(X509) **chain);
+ static EVP_PKEY *ngx_ssl_load_certificate_key(ngx_pool_t *pool, char **err,
+@@ -144,6 +144,15 @@ int  ngx_ssl_certificate_name_index;
+ int  ngx_ssl_stapling_index;
+ 
+ 
++static ngx_int_t
++ngx_ssl_engine_cleanup(void *data){
++    ENGINE *e = data;
++
++    ENGINE_finish(e);
++
++    return NGX_OK;
++}
++
+ ngx_int_t
+ ngx_ssl_init(ngx_log_t *log)
+ {
+@@ -680,8 +689,9 @@ ngx_ssl_load_certificate(ngx_pool_t *pool, char **err, ngx_str_t *cert,
+ 
+ #ifndef OPENSSL_NO_ENGINE
+ 
+-        u_char  *p, *last;
+-        ENGINE  *engine;
++        u_char              *p, *last;
++        ENGINE              *engine;
++        ngx_pool_cleanup_t  *cln;
+ 
+         p = cert->data + sizeof("engine:") - 1;
+         last = (u_char *) ngx_strchr(p, ':');
+@@ -706,6 +716,16 @@ ngx_ssl_load_certificate(ngx_pool_t *pool, char **err, ngx_str_t *cert,
+             return NULL;
+         }
+ 
++        cln = ngx_pool_cleanup_add(pool, 0);
++        if (cln == NULL) {
++            *err = "failed to add ENGINE cleanup";
++            ENGINE_free(engine);
++            return NULL;
++        }
++
++        cln->handler = ngx_ssl_engine_cleanup;
++        cln->data = engine;
++
+         *last++ = ':';
+ 
+         struct {
+@@ -719,7 +739,6 @@ ngx_ssl_load_certificate(ngx_pool_t *pool, char **err, ngx_str_t *cert,
+             return NULL;
+         }
+ 
+-        ENGINE_finish(engine);
+         ENGINE_free(engine);
+ 
+         /* set chain to null */
+@@ -899,11 +918,13 @@ static EVP_PKEY *
+ ngx_ssl_load_certificate_key(ngx_pool_t *pool, char **err,
+     ngx_str_t *key, ngx_array_t *passwords, ngx_ssl_ppdialog_conf_t *dlg)
+ {
+-    BIO              *bio;
+-    EVP_PKEY         *pkey;
+-    ngx_str_t        *pwd;
+-    ngx_uint_t        tries;
+-    pem_password_cb  *cb;
++    BIO                 *bio;
++    EVP_PKEY            *pkey;
++    ngx_str_t           *pwd;
++    ngx_uint_t          tries;
++    pem_password_cb     *cb;
++    ngx_pool_cleanup_t  *cln;
++
+ 
+     if (ngx_strncmp(key->data, "engine:", sizeof("engine:") - 1) == 0) {
+ 
+@@ -935,18 +956,26 @@ ngx_ssl_load_certificate_key(ngx_pool_t *pool, char **err,
+             return NULL;
+         }
+ 
++        cln = ngx_pool_cleanup_add(pool, 0);
++        if (cln == NULL) {
++            *err = "failed to add ENGINE cleanup";
++            ENGINE_free(engine);
++            return NULL;
++        }
++
++        cln->handler = ngx_ssl_engine_cleanup;
++        cln->data = engine;
++
+         *last++ = ':';
+ 
+         pkey = ENGINE_load_private_key(engine, (char *) last, 0, 0);
+ 
+         if (pkey == NULL) {
+             *err = "ENGINE_load_private_key() failed";
+-            ENGINE_finish(engine);
+             ENGINE_free(engine);
+             return NULL;
+         }
+ 
+-        ENGINE_finish(engine);
+         ENGINE_free(engine);
+ 
+         return pkey;
+-- 
+2.44.0
+
