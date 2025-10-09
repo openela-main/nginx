@@ -41,7 +41,7 @@
 Name:              nginx
 Epoch:             2
 Version:           1.20.1
-Release:           20%{?dist}
+Release:           22%{?dist}.3
 
 Summary:           A high performance web server and reverse proxy server
 # BSD License (two clause)
@@ -62,6 +62,7 @@ Source13:          nginx-upgrade
 Source14:          nginx-upgrade.8
 Source15:          macros.nginxmods.in
 Source16:          nginxmods.attr
+Source17:          nginx.sysusers
 Source102:         nginx-logo.png
 Source103:         404.html
 Source104:         50x.html
@@ -100,6 +101,19 @@ Patch8:            0009-defer-ENGINE_finish-calls-to-a-cleanup.patch
 # upstream patch - https://issues.redhat.com/browse/RHEL-40075
 Patch9:            0010-Optimized-chain-link-usage.patch
 
+# upstream patch - https://issues.redhat.com/browse/RHEL-78236
+Patch10:           nginx-1.20.1-CVE-2025-23419.patch
+
+# upstream patch - https://bugzilla.redhat.com/show_bug.cgi?id=2304966
+Patch11:           0011-CVE-2024-7347-Buffer-overread-in-the-mp4-module.patch
+
+# upstream patch - https://bugzilla.redhat.com/show_bug.cgi?id=2141496
+#                - https://bugzilla.redhat.com/show_bug.cgi?id=2141495
+Patch12:           0012-CVE-2022-41741-and-CVE-2022-41742-fix.patch
+
+# upstream patch - https://issues.redhat.com/browse/RHEL-6786
+Patch13:           0013-SSL-use-of-the-SSL_OP_IGNORE_UNEXPECTED_EOF-option.patch
+
 BuildRequires:     make
 BuildRequires:     gcc
 BuildRequires:     gnupg2
@@ -134,9 +148,9 @@ Recommends:        logrotate
 Requires:          %{name}-core = %{epoch}:%{version}-%{release}
 
 BuildRequires:     systemd
-Requires(post):    systemd
-Requires(preun):   systemd
-Requires(postun):  systemd
+BuildRequires:     systemd-rpm-macros
+%{?systemd_requires}
+
 # For external nginx modules
 Provides:          nginx(abi) = %{nginx_abiversion}
 
@@ -176,7 +190,7 @@ Meta package that installs all available nginx modules.
 %package filesystem
 Summary:           The basic directory layout for the Nginx server
 BuildArch:         noarch
-Requires(pre):     shadow-utils
+%{?sysusers_requires_compat}
 
 %description filesystem
 The nginx-filesystem package contains the basic directory layout
@@ -466,14 +480,11 @@ sed -e "s|@@NGINX_ABIVERSION@@|%{nginx_abiversion}|g" \
 ## Install dependency generator
 install -Dpm0644 -t %{buildroot}%{_fileattrsdir} %{SOURCE16}
 
-
+# install sysusers file
+install -p -D -m 0644 %{SOURCE17} %{buildroot}%{_sysusersdir}/nginx.conf
 
 %pre filesystem
-getent group %{nginx_user} > /dev/null || groupadd -r %{nginx_user}
-getent passwd %{nginx_user} > /dev/null || \
-    useradd -r -d %{_localstatedir}/lib/nginx -g %{nginx_user} \
-    -s /sbin/nologin -c "Nginx web server" %{nginx_user}
-exit 0
+%sysusers_create_compat %{SOURCE17}
 
 %post
 %systemd_post nginx.service
@@ -574,6 +585,7 @@ fi
 %dir %{_sysconfdir}/nginx/default.d
 %dir %{_sysconfdir}/systemd/system/nginx.service.d
 %dir %{_unitdir}/nginx.service.d
+%{_sysusersdir}/nginx.conf
 
 %if %{with geoip}
 %files mod-http-geoip
@@ -611,6 +623,27 @@ fi
 
 
 %changelog
+* Wed May 14 2025 Luboš Uhliarik <luhliari@redhat.com> - 2:1.20.1-22.3
+- Resolves: RHEL-89991 - SSL-errors 0A000126 / NS_NET_ERROR_PARTIAL_TRANSFER at
+  nginx with reverse-proxy
+
+* Mon Mar 31 2025 Luboš Uhliarik <luhliari@redhat.com> - 2:1.20.1-22.2
+- Resolves: RHEL-85550 - nginx: Memory disclosure in the
+  ngx_http_mp4_module (CVE-2022-41742)
+- Resolves: RHEL-85527 - nginx: Memory corruption in the
+  ngx_http_mp4_module (CVE-2022-41741)
+
+* Fri Mar 21 2025 Luboš Uhliarik <luhliari@redhat.com> - 2:1.20.1-22.1
+- Resolves: RHEL-84339 - nginx: Nginx: Specially crafted file may cause
+  Denial of Service (CVE-2024-7347)
+
+* Thu Feb 13 2025 Luboš Uhliarik <luhliari@redhat.com> - 2:1.20.1-22
+- Resolves: RHEL-78236 - nginx: TLS Session Resumption
+  Vulnerability (CVE-2025-23419)
+
+* Wed Feb 05 2025 Luboš Uhliarik <luhliari@redhat.com> - 2:1.20.1-21
+- Resolves: RHEL-77486 - [RFE] nginx use systemd-sysusers
+
 * Mon Jul 15 2024 Luboš Uhliarik <luhliari@redhat.com> - 2:1.20.1-20
 - Resolves: RHEL-40075 - nginx worker processes memory leak
 
