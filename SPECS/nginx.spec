@@ -56,7 +56,7 @@
 Name:              nginx
 Epoch:             1
 Version:           1.24.0
-Release:           1%{?dist}.1
+Release:           5%{?dist}.1
 
 Summary:           A high performance web server and reverse proxy server
 # BSD License (two clause)
@@ -113,6 +113,19 @@ Patch6:            0008-add-ssl-pass-phrase-dialog.patch
 
 # security fix - https://issues.redhat.com/browse/RHEL-12737
 Patch7:            0009-CVE-2023-44487-HTTP-2-per-iteration-stream-handling.patch
+
+# downstream patch - https://issues.redhat.com/browse/RHEL-40621
+Patch8:            0010-defer-ENGINE_finish-calls-to-a-cleanup.patch
+
+# upstream patch - https://issues.redhat.com/browse/RHEL-40075
+Patch9:            0011-Optimized-chain-link-usage.patch
+
+# upstream patch - https://bugzilla.redhat.com/show_bug.cgi?id=2304966
+Patch10:           0012-CVE-2024-7347-Buffer-overread-in-the-mp4-module.patch
+
+# https://issues.redhat.com/browse/RHEL-146516
+# upstream patch - https://github.com/nginx/nginx/commit/784fa05025cb8cd0c770f99bc79d2794b9f85b6e
+Patch11:           0013-Upstream-detect-premature-plain-text-response-from-S.patch
 
 BuildRequires:     make
 BuildRequires:     gcc
@@ -626,8 +639,22 @@ fi
 
 
 %changelog
-* Wed May 29 2024 Luboš Uhliarik <luhliari@redhat.com> - 1:1.24.0-1.1
-- Resolves: RHEL-39333 - Nginx seg faults when proxy_ssl_certificate is set
+* Thu Feb 19 2026 Luboš Uhliarik <luhliari@redhat.com> - 1:1.24.0-5.1
+- Resolves: RHEL-146526 - nginx:1.24/nginx: NGINX: Data injection via
+  man-in-the-middle attack on TLS proxied connections (CVE-2026-1642)
+
+* Thu Mar 27 2025 Luboš Uhliarik <luhliari@redhat.com> - 1:1.24.0-5
+- Resolves: RHEL-84480 - nginx:1.24/nginx: specially crafted MP4 file may cause
+  denial of service (CVE-2024-7347)
+
+* Tue Jul 16 2024 Luboš Uhliarik <luhliari@redhat.com> - 1:1.24.0-4
+- Resolves: RHEL-49350 - nginx worker processes memory leak
+
+* Thu Jun 13 2024 Luboš Uhliarik <luhliari@redhat.com> - 1:1.24.0-3
+- Resolves: RHEL-40622 - openssl 3.2 ENGINE regression in nginx
+
+* Thu May 23 2024 Luboš Uhliarik <luhliari@redhat.com> - 1:1.24.0-2
+- Resolves: RHEL-38498 - Nginx seg faults when proxy_ssl_certificate is set
 
 * Thu Jan 18 2024 Luboš Uhliarik <luhliari@redhat.com> - 1:1.24.0-1
 - new version 1.24.0
