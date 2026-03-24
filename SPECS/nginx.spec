@@ -30,7 +30,7 @@
 Name:              nginx
 Epoch:             1
 Version:           1.24.0
-Release:           1%{?dist}
+Release:           2%{?dist}
 
 Summary:           A high performance web server and reverse proxy server
 Group:             System Environment/Daemons
@@ -76,6 +76,10 @@ Patch5:            nginx-1.18.0-pkcs11-cert.patch
 
 # https://issues.redhat.com/browse/RHEL-12728
 Patch6:            nginx-1.22-CVE-2023-44487.patch
+
+# https://issues.redhat.com/browse/RHEL-146516
+# upstream patch - https://github.com/nginx/nginx/commit/784fa05025cb8cd0c770f99bc79d2794b9f85b6e
+Patch7:            0007-Upstream-detect-premature-plain-text-response-from-S.patch
 
 %if 0%{?with_gperftools}
 BuildRequires:     gperftools-devel
@@ -234,6 +238,7 @@ Requires:          zlib-devel
 %patch4 -p1
 %patch5 -p1
 %patch6 -p1
+%patch7 -p1
 
 cp %{SOURCE200} %{SOURCE210} %{SOURCE10} %{SOURCE12} .
 
@@ -546,6 +551,10 @@ fi
 %{nginx_srcdir}/
 
 %changelog
+* Sun Feb 22 2026 Luboš Uhliarik <luhliari@redhat.com> - 1:1.24.0-2
+- Resolves: RHEL-146517 - nginx:1.24/nginx: NGINX: Data injection via
+  man-in-the-middle attack on TLS proxied connections (CVE-2026-1642)
+
 * Thu Jan 18 2024 Luboš Uhliarik <luhliari@redhat.com> - 1:1.24.0-1
 - Resolves: RHEL-14714 - add nginx:1.24 to RHEL 8.10
 
