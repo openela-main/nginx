@@ -41,7 +41,7 @@
 Name:              nginx
 Epoch:             2
 Version:           1.20.1
-Release:           22%{?dist}.3
+Release:           24%{?dist}.1
 
 Summary:           A high performance web server and reverse proxy server
 # BSD License (two clause)
@@ -104,15 +104,19 @@ Patch9:            0010-Optimized-chain-link-usage.patch
 # upstream patch - https://issues.redhat.com/browse/RHEL-78236
 Patch10:           nginx-1.20.1-CVE-2025-23419.patch
 
-# upstream patch - https://bugzilla.redhat.com/show_bug.cgi?id=2304966
-Patch11:           0011-CVE-2024-7347-Buffer-overread-in-the-mp4-module.patch
+# upstream patch - https://issues.redhat.com/browse/RHEL-6786
+Patch11:           0011-SSL-use-of-the-SSL_OP_IGNORE_UNEXPECTED_EOF-option.patch
 
 # upstream patch - https://bugzilla.redhat.com/show_bug.cgi?id=2141496
 #                - https://bugzilla.redhat.com/show_bug.cgi?id=2141495
 Patch12:           0012-CVE-2022-41741-and-CVE-2022-41742-fix.patch
 
-# upstream patch - https://issues.redhat.com/browse/RHEL-6786
-Patch13:           0013-SSL-use-of-the-SSL_OP_IGNORE_UNEXPECTED_EOF-option.patch
+# upstream patch - https://bugzilla.redhat.com/show_bug.cgi?id=2304966
+Patch13:           0013-CVE-2024-7347-Buffer-overread-in-the-mp4-module.patch
+
+# https://issues.redhat.com/browse/RHEL-146516
+# upstream patch - https://github.com/nginx/nginx/commit/784fa05025cb8cd0c770f99bc79d2794b9f85b6e
+Patch14:           0014-Upstream-detect-premature-plain-text-response-from-S.patch
 
 BuildRequires:     make
 BuildRequires:     gcc
@@ -623,19 +627,21 @@ fi
 
 
 %changelog
-* Wed May 14 2025 Luboš Uhliarik <luhliari@redhat.com> - 2:1.20.1-22.3
-- Resolves: RHEL-89991 - SSL-errors 0A000126 / NS_NET_ERROR_PARTIAL_TRANSFER at
-  nginx with reverse-proxy
+* Thu Feb 19 2026 Luboš Uhliarik <luhliari@redhat.com> - 2:1.20.1-24.1
+- Resolves: RHEL-146525 - nginx: NGINX: Data injection via man-in-the-middle
+  attack on TLS proxied connections (CVE-2026-1642)
 
-* Mon Mar 31 2025 Luboš Uhliarik <luhliari@redhat.com> - 2:1.20.1-22.2
-- Resolves: RHEL-85550 - nginx: Memory disclosure in the
+* Wed May 14 2025 Luboš Uhliarik <luhliari@redhat.com> - 2:1.20.1-24
+- Resolves: RHEL-84477 - nginx: specially crafted MP4 file may cause
+  denial of service (CVE-2024-7347)
+- Resolves: RHEL-85556 - nginx: Memory disclosure in the
   ngx_http_mp4_module (CVE-2022-41742)
-- Resolves: RHEL-85527 - nginx: Memory corruption in the
+- Resolves: RHEL-91446 - nginx: Memory corruption in the
   ngx_http_mp4_module (CVE-2022-41741)
 
-* Fri Mar 21 2025 Luboš Uhliarik <luhliari@redhat.com> - 2:1.20.1-22.1
-- Resolves: RHEL-84339 - nginx: Nginx: Specially crafted file may cause
-  Denial of Service (CVE-2024-7347)
+* Thu Apr 24 2025 Luboš Uhliarik <luhliari@redhat.com> - 2:1.20.1-23
+- Resolves: RHEL-6786 - SSL-errors 0A000126 / NS_NET_ERROR_PARTIAL_TRANSFER
+  at nginx with reverse-proxy
 
 * Thu Feb 13 2025 Luboš Uhliarik <luhliari@redhat.com> - 2:1.20.1-22
 - Resolves: RHEL-78236 - nginx: TLS Session Resumption
