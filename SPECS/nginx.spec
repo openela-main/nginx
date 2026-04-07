@@ -30,7 +30,7 @@
 Name:              nginx
 Epoch:             1
 Version:           1.24.0
-Release:           2%{?dist}
+Release:           3%{?dist}
 
 Summary:           A high performance web server and reverse proxy server
 Group:             System Environment/Daemons
@@ -80,6 +80,23 @@ Patch6:            nginx-1.22-CVE-2023-44487.patch
 # https://issues.redhat.com/browse/RHEL-146516
 # upstream patch - https://github.com/nginx/nginx/commit/784fa05025cb8cd0c770f99bc79d2794b9f85b6e
 Patch7:            0007-Upstream-detect-premature-plain-text-response-from-S.patch
+
+# https://redhat.atlassian.net/browse/RHEL-159561
+# upstream patch - https://github.com/nginx/nginx/commit/a1d18284e0a17
+# whitespace were removed from the patch
+Patch8:           0008-Dav-destination-length-validation-for-COPY-and-MOVE.patch
+
+# https://redhat.atlassian.net/browse/RHEL-159540
+# upstream patch - https://github.com/nginx/nginx/commit/3568812cf98df
+Patch9:           0009-Mp4-fixed-possible-integer-overflow-on-32-bit-platfo.patch
+
+# https://redhat.atlassian.net/browse/RHEL-159448
+# upstream patch - https://github.com/nginx/nginx/commit/9bc13718fe8a59a45
+Patch10:           0010-Mail-fixed-clearing-s-passwd-in-auth-http-requests.patch
+
+# https://redhat.atlassian.net/browse/RHEL-157889
+# upstream patch - https://github.com/nginx/nginx/commit/7725c372c2f
+Patch11:           0011-Mp4-avoid-zero-size-buffers-in-output.patch
 
 %if 0%{?with_gperftools}
 BuildRequires:     gperftools-devel
@@ -231,14 +248,18 @@ Requires:          zlib-devel
 
 %prep
 %setup -q
-%patch0 -p0
-%patch1 -p1
-%patch2 -p1
-%patch3 -p1
-%patch4 -p1
-%patch5 -p1
-%patch6 -p1
-%patch7 -p1
+%patch -P0 -p0
+%patch -P1 -p1
+%patch -P2 -p1
+%patch -P3 -p1
+%patch -P4 -p1
+%patch -P5 -p1
+%patch -P6 -p1
+%patch -P7 -p1
+%patch -P8 -p1
+%patch -P9 -p1
+%patch -P10 -p1
+%patch -P11 -p1
 
 cp %{SOURCE200} %{SOURCE210} %{SOURCE10} %{SOURCE12} .
 
@@ -551,6 +572,16 @@ fi
 %{nginx_srcdir}/
 
 %changelog
+* Fri Mar 27 2026 Zdenek Dohnal <zdohnal@redhat.com> - 1:1.24.0-3
+- Resolves: RHEL-157877 CVE-2026-32647 nginx:1.24/nginx: NGINX: Denial of
+  Service or Code Execution via specially crafted MP4 files
+- Resolves: RHEL-159436 CVE-2026-27651 nginx:1.24/nginx: NGINX: Denial of
+  Service via undisclosed requests when ngx_mail_auth_http_module is enabled
+- Resolves: RHEL-159549 CVE-2026-27654 nginx:1.24/nginx: NGINX: Denial of
+  Service or file modification via buffer overflow in ngx_http_dav_module
+- Resolves: RHEL-159528 CVE-2026-27784 nginx:1.24/nginx: NGINX: Denial of
+  Service due to memory corruption via crafted MP4 file
+
 * Sun Feb 22 2026 Luboš Uhliarik <luhliari@redhat.com> - 1:1.24.0-2
 - Resolves: RHEL-146517 - nginx:1.24/nginx: NGINX: Data injection via
   man-in-the-middle attack on TLS proxied connections (CVE-2026-1642)
