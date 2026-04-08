@@ -41,7 +41,7 @@
 Name:              nginx
 Epoch:             2
 Version:           1.20.1
-Release:           24%{?dist}.1
+Release:           24%{?dist}.2
 
 Summary:           A high performance web server and reverse proxy server
 # BSD License (two clause)
@@ -117,6 +117,23 @@ Patch13:           0013-CVE-2024-7347-Buffer-overread-in-the-mp4-module.patch
 # https://issues.redhat.com/browse/RHEL-146516
 # upstream patch - https://github.com/nginx/nginx/commit/784fa05025cb8cd0c770f99bc79d2794b9f85b6e
 Patch14:           0014-Upstream-detect-premature-plain-text-response-from-S.patch
+
+# https://redhat.atlassian.net/browse/RHEL-159557
+# upstream patch - https://github.com/nginx/nginx/commit/a1d18284e0a17
+# whitespace were removed from the patch
+Patch15:           0015-Dav-destination-length-validation-for-COPY-and-MOVE.patch
+
+# https://redhat.atlassian.net/browse/RHEL-159536
+# upstream patch - https://github.com/nginx/nginx/commit/3568812cf98df
+Patch16:           0016-Mp4-fixed-possible-integer-overflow-on-32-bit-platfo.patch
+
+# https://redhat.atlassian.net/browse/RHEL-159444
+# upstream patch - https://github.com/nginx/nginx/commit/9bc13718fe8a59a45
+Patch17:           0017-Mail-fixed-clearing-s-passwd-in-auth-http-requests.patch
+
+# https://redhat.atlassian.net/browse/RHEL-157885
+# upstream patch - https://github.com/nginx/nginx/commit/7725c372c2f
+Patch18:           0018-Mp4-avoid-zero-size-buffers-in-output.patch
 
 BuildRequires:     make
 BuildRequires:     gcc
@@ -627,6 +644,12 @@ fi
 
 
 %changelog
+* Tue Mar 31 2026 Zdenek Dohnal <zdohnal@redhat.com> - 2:1.20.1-24.2
+- Resolves: RHEL-159557 - CVE-2026-27654 nginx: NGINX: Denial of Service or file modification via buffer overflow in ngx_http_dav_module
+- Resolves: RHEL-159536 - CVE-2026-27784 nginx: NGINX: Denial of Service due to memory corruption via crafted MP4 file
+- Resolves: RHEL-159444 - CVE-2026-27651 nginx: NGINX: Denial of Service via undisclosed requests when ngx_mail_auth_http_module is enabled
+- Resolves: RHEL-157885 - CVE-2026-32647 nginx: NGINX: Denial of Service or Code Execution via specially crafted MP4 files
+
 * Thu Feb 19 2026 Luboš Uhliarik <luhliari@redhat.com> - 2:1.20.1-24.1
 - Resolves: RHEL-146525 - nginx: NGINX: Data injection via man-in-the-middle
   attack on TLS proxied connections (CVE-2026-1642)
