@@ -41,7 +41,7 @@
 Name:              nginx
 Epoch:             2
 Version:           1.20.1
-Release:           28%{?dist}.1
+Release:           28%{?dist}.2
 
 Summary:           A high performance web server and reverse proxy server
 # BSD License (two clause)
@@ -140,6 +140,9 @@ Patch18:           0018-Mail-fixed-clearing-s-passwd-in-auth-http-requests.patch
 # upstream patch - https://github.com/nginx/nginx/commit/7725c372c2f
 Patch19:           0019-Mp4-avoid-zero-size-buffers-in-output.patch
 
+# https://bugzilla.redhat.com/show_bug.cgi?id=CVE-2026-42945
+# upstream patch - https://github.com/nginx/nginx/commit/524977e7
+Patch20:           0020-Rewrite-fixed-escaping-and-possible-buffer-overrun.patch
 
 BuildRequires:     make
 BuildRequires:     gcc
@@ -657,6 +660,10 @@ fi
 
 
 %changelog
+* Thu May 14 2026 Luboš Uhliarik <luhliari@redhat.com> - 2:1.20.1-28.2
+- Resolves: RHEL-176232 - nginx: NGINX: Arbitrary Code Execution
+  Vulnerability (CVE-2026-42945)
+
 * Fri Mar 27 2026 Zdenek Dohnal <zdohnal@redhat.com> - 2:1.20.1-28.1
 - RHEL-159560 CVE-2026-27654 nginx: NGINX: Denial of Service or file modification via buffer overflow in ngx_http_dav_module
 - RHEL-159539 CVE-2026-27784 nginx: NGINX: Denial of Service due to memory corruption via crafted MP4 file
