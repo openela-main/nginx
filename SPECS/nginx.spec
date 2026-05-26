@@ -41,7 +41,7 @@
 Name:              nginx
 Epoch:             2
 Version:           1.20.1
-Release:           24%{?dist}.2
+Release:           28%{?dist}.1
 
 Summary:           A high performance web server and reverse proxy server
 # BSD License (two clause)
@@ -63,6 +63,7 @@ Source14:          nginx-upgrade.8
 Source15:          macros.nginxmods.in
 Source16:          nginxmods.attr
 Source17:          nginx.sysusers
+Source18:          nginx.tmpfiles
 Source102:         nginx-logo.png
 Source103:         404.html
 Source104:         50x.html
@@ -114,26 +115,31 @@ Patch12:           0012-CVE-2022-41741-and-CVE-2022-41742-fix.patch
 # upstream patch - https://bugzilla.redhat.com/show_bug.cgi?id=2304966
 Patch13:           0013-CVE-2024-7347-Buffer-overread-in-the-mp4-module.patch
 
+# https://issues.redhat.com/browse/RHEL-113229
+# upstream patch - https://github.com/nginx/nginx/pull/1089
+Patch14:           0014-Clarify-binding-behavior-of-t-option.patch
+
 # https://issues.redhat.com/browse/RHEL-146516
 # upstream patch - https://github.com/nginx/nginx/commit/784fa05025cb8cd0c770f99bc79d2794b9f85b6e
-Patch14:           0014-Upstream-detect-premature-plain-text-response-from-S.patch
+Patch15:           0015-Upstream-detect-premature-plain-text-response-from-S.patch
 
-# https://redhat.atlassian.net/browse/RHEL-159557
+# https://redhat.atlassian.net/browse/RHEL-159560
 # upstream patch - https://github.com/nginx/nginx/commit/a1d18284e0a17
 # whitespace were removed from the patch
-Patch15:           0015-Dav-destination-length-validation-for-COPY-and-MOVE.patch
+Patch16:           0016-Dav-destination-length-validation-for-COPY-and-MOVE.patch
 
-# https://redhat.atlassian.net/browse/RHEL-159536
+# https://redhat.atlassian.net/browse/RHEL-159539
 # upstream patch - https://github.com/nginx/nginx/commit/3568812cf98df
-Patch16:           0016-Mp4-fixed-possible-integer-overflow-on-32-bit-platfo.patch
+Patch17:           0017-Mp4-fixed-possible-integer-overflow-on-32-bit-platfo.patch
 
-# https://redhat.atlassian.net/browse/RHEL-159444
+# https://redhat.atlassian.net/browse/RHEL-159447
 # upstream patch - https://github.com/nginx/nginx/commit/9bc13718fe8a59a45
-Patch17:           0017-Mail-fixed-clearing-s-passwd-in-auth-http-requests.patch
+Patch18:           0018-Mail-fixed-clearing-s-passwd-in-auth-http-requests.patch
 
-# https://redhat.atlassian.net/browse/RHEL-157885
+# https://redhat.atlassian.net/browse/RHEL-157888
 # upstream patch - https://github.com/nginx/nginx/commit/7725c372c2f
-Patch18:           0018-Mp4-avoid-zero-size-buffers-in-output.patch
+Patch19:           0019-Mp4-avoid-zero-size-buffers-in-output.patch
+
 
 BuildRequires:     make
 BuildRequires:     gcc
@@ -429,6 +435,8 @@ install -p -m 0644 ./nginx.conf \
     %{buildroot}%{_sysconfdir}/nginx
 
 rm -f %{buildroot}%{_datadir}/nginx/html/index.html
+rm -f %{buildroot}%{_datadir}/nginx/html/50x.html
+
 %if 0%{?el7}
 ln -s ../../doc/HTML/index.html \
       %{buildroot}%{_datadir}/nginx/html/index.html
@@ -503,6 +511,10 @@ install -Dpm0644 -t %{buildroot}%{_fileattrsdir} %{SOURCE16}
 
 # install sysusers file
 install -p -D -m 0644 %{SOURCE17} %{buildroot}%{_sysusersdir}/nginx.conf
+
+# tmpfiles.d configuration
+mkdir -p %{buildroot}%{_tmpfilesdir}
+install -m 644 -p %{SOURCE18} %{buildroot}%{_tmpfilesdir}/nginx.conf
 
 %pre filesystem
 %sysusers_create_compat %{SOURCE17}
@@ -591,6 +603,7 @@ fi
 %attr(770,%{nginx_user},root) %dir %{_localstatedir}/lib/nginx
 %attr(770,%{nginx_user},root) %dir %{_localstatedir}/lib/nginx/tmp
 %attr(711,root,root) %dir %{_localstatedir}/log/nginx
+%{_tmpfilesdir}/nginx.conf
 %ghost %attr(640,%{nginx_user},root) %{_localstatedir}/log/nginx/access.log
 %ghost %attr(640,%{nginx_user},root) %{_localstatedir}/log/nginx/error.log
 %dir %{nginx_moduledir}
@@ -644,15 +657,25 @@ fi
 
 
 %changelog
-* Tue Mar 31 2026 Zdenek Dohnal <zdohnal@redhat.com> - 2:1.20.1-24.2
-- Resolves: RHEL-159557 - CVE-2026-27654 nginx: NGINX: Denial of Service or file modification via buffer overflow in ngx_http_dav_module
-- Resolves: RHEL-159536 - CVE-2026-27784 nginx: NGINX: Denial of Service due to memory corruption via crafted MP4 file
-- Resolves: RHEL-159444 - CVE-2026-27651 nginx: NGINX: Denial of Service via undisclosed requests when ngx_mail_auth_http_module is enabled
-- Resolves: RHEL-157885 - CVE-2026-32647 nginx: NGINX: Denial of Service or Code Execution via specially crafted MP4 files
+* Fri Mar 27 2026 Zdenek Dohnal <zdohnal@redhat.com> - 2:1.20.1-28.1
+- RHEL-159560 CVE-2026-27654 nginx: NGINX: Denial of Service or file modification via buffer overflow in ngx_http_dav_module
+- RHEL-159539 CVE-2026-27784 nginx: NGINX: Denial of Service due to memory corruption via crafted MP4 file
+- RHEL-159447 CVE-2026-27651 nginx: NGINX: Denial of Service via undisclosed requests when ngx_mail_auth_http_module is enabled
+- RHEL-157888 CVE-2026-32647 nginx: NGINX: Denial of Service or Code Execution via specially crafted MP4 files
 
-* Thu Feb 19 2026 Luboš Uhliarik <luhliari@redhat.com> - 2:1.20.1-24.1
-- Resolves: RHEL-146525 - nginx: NGINX: Data injection via man-in-the-middle
-  attack on TLS proxied connections (CVE-2026-1642)
+* Tue Feb 17 2026 Luboš Uhliarik <luhliari@redhat.com> - 2:1.20.1-28
+- Resolves: RHEL-146528 - CVE-2026-1642 nginx: NGINX: Data injection via
+  man-in-the-middle attack on TLS proxied connection
+
+* Thu Jan 29 2026 Luboš Uhliarik <luhliari@redhat.com> - 2:1.20.1-27
+- Resolves: RHEL-145177 - Clarify binding behavior of -t option
+
+* Thu Nov 20 2025 Luboš Uhliarik <luhliari@redhat.com> - 2:1.20.1-26
+- Resolves: RHEL-102548 - Remove 50x.html for nginx 1.26
+
+* Wed Nov 19 2025 Luboš Uhliarik <luhliari@redhat.com> - 2:1.20.1-25
+- Resolves: RHEL-114935 - Image mode: The dir /var/lib and /var/log
+  is not created when updating system in image mode
 
 * Wed May 14 2025 Luboš Uhliarik <luhliari@redhat.com> - 2:1.20.1-24
 - Resolves: RHEL-84477 - nginx: specially crafted MP4 file may cause
