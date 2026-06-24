@@ -30,7 +30,7 @@
 Name:              nginx
 Epoch:             1
 Version:           1.24.0
-Release:           3%{?dist}.1
+Release:           3%{?dist}.2
 
 Summary:           A high performance web server and reverse proxy server
 Group:             System Environment/Daemons
@@ -101,6 +101,14 @@ Patch11:           0011-Mp4-avoid-zero-size-buffers-in-output.patch
 # https://bugzilla.redhat.com/show_bug.cgi?id=CVE-2026-42945
 # upstream patch - https://github.com/nginx/nginx/commit/524977e7
 Patch12:           0012-Rewrite-fixed-escaping-and-possible-buffer-overrun.patch
+
+# https://redhat.atlassian.net/browse/RHEL-178669
+# upstream patch - https://github.com/nginx/nginx/commit/ca4f92a27464ae6c2082245e4f67048c633aa032
+Patch13:           0013-Rewrite-fix-buffer-overflow-with-overlapping-capture.patch
+
+# https://redhat.atlassian.net/browse/RHEL-182544
+# upstream patch - https://github.com/nginx/nginx/commit/365694160a85229a7cb006738de9260d49ff5fa2
+Patch14:           0014-Added-max_headers-directive.patch
 
 %if 0%{?with_gperftools}
 BuildRequires:     gperftools-devel
@@ -265,6 +273,8 @@ Requires:          zlib-devel
 %patch -P10 -p1
 %patch -P11 -p1
 %patch -P12 -p1
+%patch -P13 -p1
+%patch -P14 -p1
 
 cp %{SOURCE200} %{SOURCE210} %{SOURCE10} %{SOURCE12} .
 
@@ -577,6 +587,12 @@ fi
 %{nginx_srcdir}/
 
 %changelog
+* Thu Jun 11 2026 Luboš Uhliarik <luhliari@redhat.com> - 1:1.24.0-3.2
+- Resolves: RHEL-178676 - nginx:1.24/nginx: code execution and denial
+  of service (CVE-2026-9256)
+- Resolves: RHEL-182543 - nginx: HTTP/2: Remote Denial of Service via
+  compression bomb and Slowloris-style attack
+
 * Thu May 14 2026 Luboš Uhliarik <luhliari@redhat.com> - 1:1.24.0-3.1
 - Resolves: RHEL-176224 - nginx:1.24/nginx: NGINX: Arbitrary Code Execution
   Vulnerability (CVE-2026-42945)
