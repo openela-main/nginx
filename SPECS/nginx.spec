@@ -62,7 +62,7 @@
 Name:              nginx
 Epoch:             2
 Version:           1.26.3
-Release:           6%{?dist}.3
+Release:           6%{?dist}.4
 
 Summary:           A high performance web server and reverse proxy server
 License:           BSD-2-Clause
@@ -138,6 +138,14 @@ Patch10:           0011-Mp4-avoid-zero-size-buffers-in-output.patch
 # https://bugzilla.redhat.com/show_bug.cgi?id=CVE-2026-42945
 # upstream patch - https://github.com/nginx/nginx/commit/524977e7
 Patch11:           0012-Rewrite-fixed-escaping-and-possible-buffer-overrun.patch
+
+# https://redhat.atlassian.net/browse/RHEL-178669
+# upstream patch - https://github.com/nginx/nginx/commit/ca4f92a27464ae6c2082245e4f67048c633aa032
+Patch12:           0013-Rewrite-fix-buffer-overflow-with-overlapping-capture.patch
+
+# https://redhat.atlassian.net/browse/RHEL-182544
+# upstream patch - https://github.com/nginx/nginx/commit/365694160a85229a7cb006738de9260d49ff5fa2
+Patch13:           0014-Added-max_headers-directive.patch
 
 BuildRequires:     make
 BuildRequires:     gcc
@@ -665,6 +673,12 @@ fi
 
 
 %changelog
+* Mon Jun 08 2026 Luboš Uhliarik <luhliari@redhat.com> - 2:1.26.3-6.4
+- Resolves: RHEL-178669 - nginx: code execution and denial of
+  service (CVE-2026-9256)
+- Resolves: RHEL-182544 - nginx: HTTP/2: Remote Denial of Service via
+  compression bomb and Slowloris-style attack
+
 * Thu May 14 2026 Luboš Uhliarik <luhliari@redhat.com> - 2:1.26.3-6.3
 - Resolves: RHEL-176231 - nginx: NGINX: Arbitrary Code Execution
   Vulnerability (CVE-2026-42945)
