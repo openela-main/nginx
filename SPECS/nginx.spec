@@ -30,7 +30,7 @@
 Name:              nginx
 Epoch:             1
 Version:           1.24.0
-Release:           3%{?dist}.2
+Release:           3%{?dist}.3
 
 Summary:           A high performance web server and reverse proxy server
 Group:             System Environment/Daemons
@@ -109,6 +109,10 @@ Patch13:           0013-Rewrite-fix-buffer-overflow-with-overlapping-capture.pat
 # https://redhat.atlassian.net/browse/RHEL-182544
 # upstream patch - https://github.com/nginx/nginx/commit/365694160a85229a7cb006738de9260d49ff5fa2
 Patch14:           0014-Added-max_headers-directive.patch
+
+# https://redhat.atlassian.net/browse/RHEL-188418
+# upstream patch - https://github.com/nginx/nginx/commit/26d824ec3a2f819300edce0ab3b055751c9843ff.patch
+Patch15:           0015-Upstream-limit-header-length-for-HTTP-2-and-gRPC.patch
 
 %if 0%{?with_gperftools}
 BuildRequires:     gperftools-devel
@@ -275,6 +279,7 @@ Requires:          zlib-devel
 %patch -P12 -p1
 %patch -P13 -p1
 %patch -P14 -p1
+%patch -P15 -p1
 
 cp %{SOURCE200} %{SOURCE210} %{SOURCE10} %{SOURCE12} .
 
@@ -587,6 +592,13 @@ fi
 %{nginx_srcdir}/
 
 %changelog
+* Tue Jul 07 2026 Luboš Uhliarik <luhliari@redhat.com> - 1:1.24.0-3.3
+- Resolves: RHEL-191779 - nginx: "HTTP/2 bomb" nginx fix breaks module ABI
+  causing crashes
+- Resolves: RHEL-188406 - nginx: NGINX: Arbitrary code execution or.
+  Denial of Service via heap-based buffer overflow with crafted HTTP/2
+  headers (CVE-2026-42055)
+
 * Thu Jun 11 2026 Luboš Uhliarik <luhliari@redhat.com> - 1:1.24.0-3.2
 - Resolves: RHEL-178676 - nginx:1.24/nginx: code execution and denial
   of service (CVE-2026-9256)
