@@ -41,7 +41,7 @@
 Name:              nginx
 Epoch:             2
 Version:           1.20.1
-Release:           28%{?dist}.2
+Release:           28%{?dist}.4
 
 Summary:           A high performance web server and reverse proxy server
 # BSD License (two clause)
@@ -143,6 +143,18 @@ Patch19:           0019-Mp4-avoid-zero-size-buffers-in-output.patch
 # https://bugzilla.redhat.com/show_bug.cgi?id=CVE-2026-42945
 # upstream patch - https://github.com/nginx/nginx/commit/524977e7
 Patch20:           0020-Rewrite-fixed-escaping-and-possible-buffer-overrun.patch
+
+# https://redhat.atlassian.net/browse/RHEL-178669
+# upstream patch - https://github.com/nginx/nginx/commit/ca4f92a27464ae6c2082245e4f67048c633aa032
+Patch21:           0021-Rewrite-fix-buffer-overflow-with-overlapping-capture.patch
+
+# https://redhat.atlassian.net/browse/RHEL-182544
+# upstream patch - https://github.com/nginx/nginx/commit/365694160a85229a7cb006738de9260d49ff5fa2
+Patch22:           0022-HTTP-2-per-iteration-stream-handling-limit.patch
+
+# https://redhat.atlassian.net/browse/RHEL-188418
+# upstream patch - https://github.com/nginx/nginx/commit/26d824ec3a2f819300edce0ab3b055751c9843ff.patch
+Patch23:           0023-Upstream-limit-header-length-for-HTTP-2-and-gRPC.patch
 
 BuildRequires:     make
 BuildRequires:     gcc
@@ -660,6 +672,19 @@ fi
 
 
 %changelog
+* Fri Jul 03 2026 Luboš Uhliarik <luhliari@redhat.com> - 2:1.20.1-28.4
+- Resolves: RHEL-190800 - nginx: "HTTP/2 bomb" nginx fix breaks module ABI
+  causing crashes
+- Resolves: RHEL-188418 - nginx: NGINX: Arbitrary code execution or 
+  Denial of Service via heap-based buffer overflow with crafted HTTP/2
+  headers (CVE-2026-42055)
+
+* Mon Jun 08 2026 Luboš Uhliarik <luhliari@redhat.com> - 2:1.20.1-28.3
+- Resolves: RHEL-178684 - nginx: code execution and denial of
+  service (CVE-2026-9256)
+- Resolves: RHEL-182553 - nginx: HTTP/2: Remote Denial of Service via
+  compression bomb and Slowloris-style attack
+
 * Thu May 14 2026 Luboš Uhliarik <luhliari@redhat.com> - 2:1.20.1-28.2
 - Resolves: RHEL-176232 - nginx: NGINX: Arbitrary Code Execution
   Vulnerability (CVE-2026-42945)
