@@ -62,7 +62,7 @@
 Name:              nginx
 Epoch:             2
 Version:           1.26.3
-Release:           6%{?dist}.5
+Release:           6%{?dist}.6
 
 Summary:           A high performance web server and reverse proxy server
 License:           BSD-2-Clause
@@ -150,6 +150,14 @@ Patch13:           0014-Added-max_headers-directive.patch
 # https://redhat.atlassian.net/browse/RHEL-188418
 # upstream patch - https://github.com/nginx/nginx/commit/26d824ec3a2f819300edce0ab3b055751c9843ff.patch
 Patch14:           0015-Upstream-limit-header-length-for-HTTP-2-and-gRPC.patch
+
+# https://redhat.atlassian.net/browse/RHEL-219313
+# upstream patch - https://github.com/nginx/nginx/commit/ddde692db11ab8238e9ca661007f64c9f6d764d2.patch
+Patch15:           0016-Avoid-duplicate-subrequest-finalization.patch
+
+# https://redhat.atlassian.net/browse/RHEL-217956
+# upstream patch - https://github.com/nginx/nginx/commit/b99f804ad38a60ceb07bc429598d5b2c4e70e336.patch
+Patch16:           0017-Fixed-uninitialized-memory-read-caused-by-stale-rege.patch
 
 BuildRequires:     make
 BuildRequires:     gcc
@@ -677,6 +685,12 @@ fi
 
 
 %changelog
+* Thu Jul 30 2026 Luboš Uhliarik <luhliari@redhat.com> - 2:1.26.3-6.6
+- Resolves: RHEL-219313 - nginx: NGINX: Heap buffer over-read allows memory
+  modification or denial of service (CVE-2026-56434)
+- Resolves: RHEL-217956 - nginx: NGINX: Memory disclosure and denial of service
+  in ngx_http_slice_module (CVE-2026-60005)
+
 * Fri Jul 03 2026 Luboš Uhliarik <luhliari@redhat.com> - 2:1.26.3-6.5
 - Resolves: RHEL-191778 - nginx: "HTTP/2 bomb" nginx fix breaks module ABI
   causing crashes
