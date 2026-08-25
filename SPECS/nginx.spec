@@ -30,7 +30,7 @@
 Name:              nginx
 Epoch:             1
 Version:           1.24.0
-Release:           3%{?dist}.3
+Release:           3%{?dist}.4
 
 Summary:           A high performance web server and reverse proxy server
 Group:             System Environment/Daemons
@@ -113,6 +113,14 @@ Patch14:           0014-Added-max_headers-directive.patch
 # https://redhat.atlassian.net/browse/RHEL-188418
 # upstream patch - https://github.com/nginx/nginx/commit/26d824ec3a2f819300edce0ab3b055751c9843ff.patch
 Patch15:           0015-Upstream-limit-header-length-for-HTTP-2-and-gRPC.patch
+
+# https://redhat.atlassian.net/browse/RHEL-219313
+# upstream patch - https://github.com/nginx/nginx/commit/ddde692db11ab8238e9ca661007f64c9f6d764d2.patch
+Patch16:           0016-Avoid-duplicate-subrequest-finalization.patch
+
+# https://redhat.atlassian.net/browse/RHEL-217956
+# upstream patch - https://github.com/nginx/nginx/commit/b99f804ad38a60ceb07bc429598d5b2c4e70e336.patch
+Patch17:           0017-Fixed-uninitialized-memory-read-caused-by-stale-rege.patch
 
 %if 0%{?with_gperftools}
 BuildRequires:     gperftools-devel
@@ -280,6 +288,8 @@ Requires:          zlib-devel
 %patch -P13 -p1
 %patch -P14 -p1
 %patch -P15 -p1
+%patch -P16 -p1
+%patch -P17 -p1
 
 cp %{SOURCE200} %{SOURCE210} %{SOURCE10} %{SOURCE12} .
 
@@ -592,6 +602,12 @@ fi
 %{nginx_srcdir}/
 
 %changelog
+* Sun Aug 09 2026 Luboš Uhliarik <luhliari@redhat.com> - 1:1.24.0-3.4
+- Resolves: RHEL-217957 - nginx:1.24/nginx: NGINX: Memory disclosure and
+  denial of service in ngx_http_slice_module (CVE-2026-60005)
+- Resolves: RHEL-219309 - nginx:1.24/nginx: NGINX: Heap buffer over-read
+  allows memory modification or denial of service (CVE-2026-56434)
+
 * Tue Jul 07 2026 Luboš Uhliarik <luhliari@redhat.com> - 1:1.24.0-3.3
 - Resolves: RHEL-191779 - nginx: "HTTP/2 bomb" nginx fix breaks module ABI
   causing crashes
