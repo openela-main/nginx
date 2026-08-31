@@ -56,7 +56,7 @@
 Name:              nginx
 Epoch:             1
 Version:           1.24.0
-Release:           7%{?dist}.1
+Release:           7%{?dist}.4
 
 Summary:           A high performance web server and reverse proxy server
 # BSD License (two clause)
@@ -148,6 +148,25 @@ Patch15:           0017-Mp4-avoid-zero-size-buffers-in-output.patch
 # upstream patch - https://github.com/nginx/nginx/commit/524977e7
 Patch16:           0018-Rewrite-fixed-escaping-and-possible-buffer-overrun.patch
 
+# https://redhat.atlassian.net/browse/RHEL-178669
+# upstream patch - https://github.com/nginx/nginx/commit/ca4f92a27464ae6c2082245e4f67048c633aa032
+Patch17:           0019-Rewrite-fix-buffer-overflow-with-overlapping-capture.patch
+
+# https://redhat.atlassian.net/browse/RHEL-182544
+# upstream patch - https://github.com/nginx/nginx/commit/365694160a85229a7cb006738de9260d49ff5fa2
+Patch18:           0020-Added-max_headers-directive.patch
+
+# https://redhat.atlassian.net/browse/RHEL-188418
+# upstream patch - https://github.com/nginx/nginx/commit/26d824ec3a2f819300edce0ab3b055751c9843ff.patch
+Patch19:           0021-Upstream-limit-header-length-for-HTTP-2-and-gRPC.patch
+
+# https://redhat.atlassian.net/browse/RHEL-219313
+# upstream patch - https://github.com/nginx/nginx/commit/ddde692db11ab8238e9ca661007f64c9f6d764d2.patch
+Patch20:           0022-Avoid-duplicate-subrequest-finalization.patch
+
+# https://redhat.atlassian.net/browse/RHEL-217956
+# upstream patch - https://github.com/nginx/nginx/commit/b99f804ad38a60ceb07bc429598d5b2c4e70e336.patch
+Patch21:           0023-Fixed-uninitialized-memory-read-caused-by-stale-rege.patch
 
 BuildRequires:     make
 BuildRequires:     gcc
@@ -661,6 +680,25 @@ fi
 
 
 %changelog
+* Tue Aug 04 2026 Luboš Uhliarik <luhliari@redhat.com> - 1:1.24.0-7.4
+- Resolves: RHEL-219310 - nginx: NGINX: Heap buffer over-read allows memory
+  modification or denial of service (CVE-2026-56434)
+- Resolves: RHEL-217962 - nginx: NGINX: Memory disclosure and denial of service
+  in ngx_http_slice_module (CVE-2026-60005)
+
+* Tue Jul 07 2026 Luboš Uhliarik <luhliari@redhat.com> - 1:1.24.0-7.3
+- Resolves: RHEL-191773 - nginx: "HTTP/2 bomb" nginx fix breaks module ABI
+  causing crashes
+- Resolves: RHEL-188413 - nginx: NGINX: Arbitrary code execution or.
+  Denial of Service via heap-based buffer overflow with crafted HTTP/2
+  headers (CVE-2026-42055)
+
+* Wed Jun 10 2026 Luboš Uhliarik <luhliari@redhat.com> - 1:1.24.0-7.2
+- Resolves: RHEL-178681 - nginx:1.24/nginx: code execution and denial
+  of service (CVE-2026-9256)
+- Resolves: RHEL-182554 - nginx:1.24/nginx: HTTP/2: Remote Denial of
+  Service via compression bomb and Slowloris-style attack
+
 * Thu May 14 2026 Luboš Uhliarik <luhliari@redhat.com> - 1:1.24.0-7.1
 - Resolves: RHEL-176234 - nginx:1.24/nginx: NGINX: Arbitrary Code Execution
   Vulnerability (CVE-2026-42945)
