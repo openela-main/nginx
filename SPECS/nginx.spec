@@ -41,7 +41,7 @@
 Name:              nginx
 Epoch:             2
 Version:           1.20.1
-Release:           28%{?dist}.4
+Release:           28%{?dist}.6
 
 Summary:           A high performance web server and reverse proxy server
 # BSD License (two clause)
@@ -155,6 +155,23 @@ Patch22:           0022-HTTP-2-per-iteration-stream-handling-limit.patch
 # https://redhat.atlassian.net/browse/RHEL-188418
 # upstream patch - https://github.com/nginx/nginx/commit/26d824ec3a2f819300edce0ab3b055751c9843ff.patch
 Patch23:           0023-Upstream-limit-header-length-for-HTTP-2-and-gRPC.patch
+
+# https://redhat.atlassian.net/browse/RHEL-219313
+# upstream patch - https://github.com/nginx/nginx/commit/ddde692db11ab8238e9ca661007f64c9f6d764d2.patch
+Patch24:           0024-Avoid-duplicate-subrequest-finalization.patch
+
+# https://redhat.atlassian.net/browse/RHEL-217956
+# upstream patch - https://github.com/nginx/nginx/commit/b99f804ad38a60ceb07bc429598d5b2c4e70e336.patch
+Patch25:           0025-Fixed-uninitialized-memory-read-caused-by-stale-rege.patch
+
+# https://redhat.atlassian.net/browse/RHEL-212458
+# upstream patches:
+# - https://github.com/nginx/nginx/commit/ea47fab
+# - https://github.com/nginx/nginx/commit/7ac6789
+# - https://github.com/nginx/nginx/commit/326b17b
+# - https://github.com/nginx/nginx/commit/97e40e5
+# - https://github.com/nginx/nginx/commit/78950bd
+Patch26:           0026-Script-access-log-buffer-overrun-protection-ABI-safe.patch
 
 BuildRequires:     make
 BuildRequires:     gcc
@@ -672,6 +689,16 @@ fi
 
 
 %changelog
+* Tue Sep 08 2026 Luboš Uhliarik <luhliari@redhat.com> - 2:1.20.1-28.6
+- Resolves: RHEL-212458 - nginx: NGINX: Arbitrary code execution via crafted
+  HTTP requests (CVE-2026-42533)
+
+* Mon Aug 03 2026 Luboš Uhliarik <luhliari@redhat.com> - 2:1.20.1-28.5
+- Resolves: RHEL-219316 - nginx: NGINX: Heap buffer over-read allows memory
+  modification or denial of service (CVE-2026-56434)
+- Resolves: RHEL-217969 - nginx: NGINX: Memory disclosure and denial of service
+  in ngx_http_slice_module (CVE-2026-60005)
+
 * Fri Jul 03 2026 Luboš Uhliarik <luhliari@redhat.com> - 2:1.20.1-28.4
 - Resolves: RHEL-190800 - nginx: "HTTP/2 bomb" nginx fix breaks module ABI
   causing crashes
