@@ -30,7 +30,7 @@
 Name:              nginx
 Epoch:             1
 Version:           1.24.0
-Release:           3%{?dist}.4
+Release:           3%{?dist}.5
 
 Summary:           A high performance web server and reverse proxy server
 Group:             System Environment/Daemons
@@ -121,6 +121,15 @@ Patch16:           0016-Avoid-duplicate-subrequest-finalization.patch
 # https://redhat.atlassian.net/browse/RHEL-217956
 # upstream patch - https://github.com/nginx/nginx/commit/b99f804ad38a60ceb07bc429598d5b2c4e70e336.patch
 Patch17:           0017-Fixed-uninitialized-memory-read-caused-by-stale-rege.patch
+
+# https://redhat.atlassian.net/browse/RHEL-212457
+# upstream patches:
+# - https://github.com/nginx/nginx/commit/ea47fab
+# - https://github.com/nginx/nginx/commit/7ac6789
+# - https://github.com/nginx/nginx/commit/326b17b
+# - https://github.com/nginx/nginx/commit/97e40e5
+# - https://github.com/nginx/nginx/commit/78950bd
+Patch18:           0018-Script-access-log-buffer-overrun-protection-ABI-safe.patch
 
 %if 0%{?with_gperftools}
 BuildRequires:     gperftools-devel
@@ -290,6 +299,7 @@ Requires:          zlib-devel
 %patch -P15 -p1
 %patch -P16 -p1
 %patch -P17 -p1
+%patch -P18 -p1
 
 cp %{SOURCE200} %{SOURCE210} %{SOURCE10} %{SOURCE12} .
 
@@ -602,6 +612,10 @@ fi
 %{nginx_srcdir}/
 
 %changelog
+* Tue Sep 08 2026 Luboš Uhliarik <luhliari@redhat.com> - 1:1.24.0-3.5
+- Resolves: RHEL-212457 - nginx:1.24/nginx: NGINX: Arbitrary code execution via
+  crafted HTTP requests (CVE-2026-42533)
+
 * Sun Aug 09 2026 Luboš Uhliarik <luhliari@redhat.com> - 1:1.24.0-3.4
 - Resolves: RHEL-217957 - nginx:1.24/nginx: NGINX: Memory disclosure and
   denial of service in ngx_http_slice_module (CVE-2026-60005)
