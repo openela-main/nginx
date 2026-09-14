@@ -62,7 +62,7 @@
 Name:              nginx
 Epoch:             2
 Version:           1.26.3
-Release:           6%{?dist}.6
+Release:           6%{?dist}.7
 
 Summary:           A high performance web server and reverse proxy server
 License:           BSD-2-Clause
@@ -158,6 +158,15 @@ Patch15:           0016-Avoid-duplicate-subrequest-finalization.patch
 # https://redhat.atlassian.net/browse/RHEL-217956
 # upstream patch - https://github.com/nginx/nginx/commit/b99f804ad38a60ceb07bc429598d5b2c4e70e336.patch
 Patch16:           0017-Fixed-uninitialized-memory-read-caused-by-stale-rege.patch
+
+# https://redhat.atlassian.net/browse/RHEL-212455
+# upstream patches:
+# - https://github.com/nginx/nginx/commit/ea47fab
+# - https://github.com/nginx/nginx/commit/7ac6789
+# - https://github.com/nginx/nginx/commit/326b17b
+# - https://github.com/nginx/nginx/commit/97e40e5
+# - https://github.com/nginx/nginx/commit/78950bd
+Patch17:           0018-Script-access-log-buffer-overrun-protection-ABI-safe.patch
 
 BuildRequires:     make
 BuildRequires:     gcc
@@ -685,6 +694,10 @@ fi
 
 
 %changelog
+* Tue Sep 08 2026 Luboš Uhliarik <luhliari@redhat.com> - 2:1.26.3-6.7
+- Resolves: RHEL-212454 - nginx: NGINX: Arbitrary code execution via crafted
+  HTTP requests (CVE-2026-42533)
+
 * Thu Jul 30 2026 Luboš Uhliarik <luhliari@redhat.com> - 2:1.26.3-6.6
 - Resolves: RHEL-219313 - nginx: NGINX: Heap buffer over-read allows memory
   modification or denial of service (CVE-2026-56434)
