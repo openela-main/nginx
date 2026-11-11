@@ -30,7 +30,7 @@
 Name:              nginx
 Epoch:             1
 Version:           1.24.0
-Release:           3%{?dist}.5
+Release:           3%{?dist}.6
 
 Summary:           A high performance web server and reverse proxy server
 Group:             System Environment/Daemons
@@ -130,6 +130,14 @@ Patch17:           0017-Fixed-uninitialized-memory-read-caused-by-stale-rege.pat
 # - https://github.com/nginx/nginx/commit/97e40e5
 # - https://github.com/nginx/nginx/commit/78950bd
 Patch18:           0018-Script-access-log-buffer-overrun-protection-ABI-safe.patch
+
+# https://redhat.atlassian.net/browse/RHEL-285354
+# upstream patch - https://github.com/nginx/nginx/commit/6adfc05ece48f92446383ec1f145446848694698
+Patch19:           0019-Limited-the-number-of-pending-operations-per-request.patch
+
+# https://redhat.atlassian.net/browse/RHEL-286573
+# upstream patch - https://github.com/nginx/nginx/commit/f8a23425bd6840c4c36b4264edf576ba3646156f
+Patch20:           0020-Avoid-post-rewrite-URI-to-path-mapping-with-alias.patch
 
 %if 0%{?with_gperftools}
 BuildRequires:     gperftools-devel
@@ -300,6 +308,8 @@ Requires:          zlib-devel
 %patch -P16 -p1
 %patch -P17 -p1
 %patch -P18 -p1
+%patch -P19 -p1
+%patch -P20 -p1
 
 cp %{SOURCE200} %{SOURCE210} %{SOURCE10} %{SOURCE12} .
 
@@ -612,6 +622,13 @@ fi
 %{nginx_srcdir}/
 
 %changelog
+* Mon Nov 02 2026 Luboš Uhliarik <luhliari@redhat.com> - 1:1.24.0-3.6
+- Resolves: RHEL-286573 - nginx:1.24/nginx: nginx: heap-based buffer overflow
+  in ngx_http_core_module via alias with rewrite referencing
+  $request_filename (CVE-2026-15176)
+- Resolves: RHEL-285354 - nginx:1.24/nginx: NGINX ngx_http_core_module
+  vulnerability (CVE-2026-97205)
+
 * Tue Sep 08 2026 Luboš Uhliarik <luhliari@redhat.com> - 1:1.24.0-3.5
 - Resolves: RHEL-212457 - nginx:1.24/nginx: NGINX: Arbitrary code execution via
   crafted HTTP requests (CVE-2026-42533)
