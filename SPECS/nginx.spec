@@ -56,7 +56,7 @@
 Name:              nginx
 Epoch:             1
 Version:           1.24.0
-Release:           7%{?dist}.5
+Release:           9%{?dist}.1
 
 Summary:           A high performance web server and reverse proxy server
 # BSD License (two clause)
@@ -127,20 +127,20 @@ Patch10:           0012-CVE-2024-7347-Buffer-overread-in-the-mp4-module.patch
 # upstream patch - https://github.com/nginx/nginx/commit/784fa05025cb8cd0c770f99bc79d2794b9f85b6e
 Patch11:           0013-Upstream-detect-premature-plain-text-response-from-S.patch
 
-# https://redhat.atlassian.net/browse/RHEL-159561
+# https://redhat.atlassian.net/browse/RHEL-159564
 # upstream patch - https://github.com/nginx/nginx/commit/a1d18284e0a17
 # whitespace were removed from the patch
 Patch12:           0014-Dav-destination-length-validation-for-COPY-and-MOVE.patch
 
-# https://redhat.atlassian.net/browse/RHEL-159540
+# https://redhat.atlassian.net/browse/RHEL-159543
 # upstream patch - https://github.com/nginx/nginx/commit/3568812cf98df
 Patch13:           0015-Mp4-fixed-possible-integer-overflow-on-32-bit-platfo.patch
 
-# https://redhat.atlassian.net/browse/RHEL-159448
+# https://redhat.atlassian.net/browse/RHEL-159451
 # upstream patch - https://github.com/nginx/nginx/commit/9bc13718fe8a59a45
 Patch14:           0016-Mail-fixed-clearing-s-passwd-in-auth-http-requests.patch
 
-# https://redhat.atlassian.net/browse/RHEL-157889
+# https://redhat.atlassian.net/browse/RHEL-157892
 # upstream patch - https://github.com/nginx/nginx/commit/7725c372c2f
 Patch15:           0017-Mp4-avoid-zero-size-buffers-in-output.patch
 
@@ -160,15 +160,15 @@ Patch18:           0020-Added-max_headers-directive.patch
 # upstream patch - https://github.com/nginx/nginx/commit/26d824ec3a2f819300edce0ab3b055751c9843ff.patch
 Patch19:           0021-Upstream-limit-header-length-for-HTTP-2-and-gRPC.patch
 
-# https://redhat.atlassian.net/browse/RHEL-219313
+# https://redhat.atlassian.net/browse/RHEL-219302
 # upstream patch - https://github.com/nginx/nginx/commit/ddde692db11ab8238e9ca661007f64c9f6d764d2.patch
 Patch20:           0022-Avoid-duplicate-subrequest-finalization.patch
 
-# https://redhat.atlassian.net/browse/RHEL-217956
+# https://redhat.atlassian.net/browse/RHEL-217971
 # upstream patch - https://github.com/nginx/nginx/commit/b99f804ad38a60ceb07bc429598d5b2c4e70e336.patch
 Patch21:           0023-Fixed-uninitialized-memory-read-caused-by-stale-rege.patch
 
-# https://redhat.atlassian.net/browse/RHEL-212508
+# https://redhat.atlassian.net/browse/RHEL-212462
 # upstream patches:
 # - https://github.com/nginx/nginx/commit/ea47fab
 # - https://github.com/nginx/nginx/commit/7ac6789
@@ -176,6 +176,14 @@ Patch21:           0023-Fixed-uninitialized-memory-read-caused-by-stale-rege.pat
 # - https://github.com/nginx/nginx/commit/97e40e5
 # - https://github.com/nginx/nginx/commit/78950bd
 Patch22:           0024-Script-access-log-buffer-overrun-protection-ABI-safe.patch
+
+# https://redhat.atlassian.net/browse/RHEL-285367
+# upstream patch - https://github.com/nginx/nginx/commit/6adfc05ece48f92446383ec1f145446848694698
+Patch23:           0025-Limited-the-number-of-pending-operations-per-request.patch
+
+# https://redhat.atlassian.net/browse/RHEL-286574
+# upstream patch - https://github.com/nginx/nginx/commit/f8a23425bd6840c4c36b4264edf576ba3646156f
+Patch24:           0026-Avoid-post-rewrite-URI-to-path-mapping-with-alias.patch
 
 BuildRequires:     make
 BuildRequires:     gcc
@@ -689,42 +697,39 @@ fi
 
 
 %changelog
-* Tue Sep 08 2026 Luboš Uhliarik <luhliari@redhat.com> - 1:1.24.0-7.5
-- Resolves: RHEL-212508 - nginx:1.24/nginx: NGINX: Arbitrary code execution
-  via crafted HTTP requests (CVE-2026-42533)
+* Sat Oct 31 2026 Luboš Uhliarik <luhliari@redhat.com> - 1:1.24.0-9.1
+- Resolves: RHEL-286574 - nginx:1.24/nginx: nginx: heap-based buffer overflow
+  in ngx_http_core_module via alias with rewrite referencing
+  $request_filename (CVE-2026-15176)
+- Resolves: RHEL-285367 - nginx:1.24/nginx: NGINX ngx_http_core_module
+  vulnerability (CVE-2026-97205)
 
-* Tue Aug 04 2026 Luboš Uhliarik <luhliari@redhat.com> - 1:1.24.0-7.4
-- Resolves: RHEL-219310 - nginx: NGINX: Heap buffer over-read allows memory
+* Sat Oct 31 2026 Luboš Uhliarik <luhliari@redhat.com> - 1:1.24.0-9
+- Resolves: RHEL-212462 - nginx:1.24/nginx: NGINX: Arbitrary code execution
+  via crafted HTTP requests (CVE-2026-42533)
+- Resolves: RHEL-219302 - nginx: NGINX: Heap buffer over-read allows memory
   modification or denial of service (CVE-2026-56434)
-- Resolves: RHEL-217962 - nginx: NGINX: Memory disclosure and denial of service
+- Resolves: RHEL-217971 - nginx: NGINX: Memory disclosure and denial of service
   in ngx_http_slice_module (CVE-2026-60005)
 
-* Tue Jul 07 2026 Luboš Uhliarik <luhliari@redhat.com> - 1:1.24.0-7.3
-- Resolves: RHEL-191773 - nginx: "HTTP/2 bomb" nginx fix breaks module ABI
-  causing crashes
-- Resolves: RHEL-188413 - nginx: NGINX: Arbitrary code execution or.
+* Mon Jul 20 2026 Luboš Uhliarik <luhliari@redhat.com> - 1:1.24.0-8
+- Resolves: RHEL-188413 - nginx: NGINX: Arbitrary code execution or
   Denial of Service via heap-based buffer overflow with crafted HTTP/2
   headers (CVE-2026-42055)
-
-* Wed Jun 10 2026 Luboš Uhliarik <luhliari@redhat.com> - 1:1.24.0-7.2
 - Resolves: RHEL-178681 - nginx:1.24/nginx: code execution and denial
   of service (CVE-2026-9256)
 - Resolves: RHEL-182554 - nginx:1.24/nginx: HTTP/2: Remote Denial of
   Service via compression bomb and Slowloris-style attack
 
-* Thu May 14 2026 Luboš Uhliarik <luhliari@redhat.com> - 1:1.24.0-7.1
-- Resolves: RHEL-176234 - nginx:1.24/nginx: NGINX: Arbitrary Code Execution
-  Vulnerability (CVE-2026-42945)
-
-* Fri Mar 27 2026 Zdenek Dohnal <zdohnal@redhat.com> - 1:1.24.0-7
-- Resolves: RHEL-157889 CVE-2026-32647 nginx:1.24/nginx: NGINX: Denial of
-  Service or Code Execution via specially crafted MP4 files
-- Resolves: RHEL-159448 CVE-2026-27651 nginx:1.24/nginx: NGINX: Denial of
-  Service via undisclosed requests when ngx_mail_auth_http_module is enabled
-- Resolves: RHEL-159561 CVE-2026-27654 nginx:1.24/nginx: NGINX: Denial of
-  Service or file modification via buffer overflow in ngx_http_dav_module
-- Resolves: RHEL-159540 CVE-2026-27784 nginx:1.24/nginx: NGINX: Denial of
-  Service due to memory corruption via crafted MP4 file
+* Tue Apr 14 2026 Petr Dancak <pdancak@redhat.com> - 1:1.24.0-7
+- Resolves: RHEL-159564 - CVE-2026-27654 nginx: NGINX: Denial of Service
+  or file modification via buffer overflow in ngx_http_dav_module
+- Resolves: RHEL-159543 - CVE-2026-27784 nginx: NGINX: Denial of Service
+  due to memory corruption via crafted MP4 file
+- Resolves: RHEL-159451 - CVE-2026-27651 nginx: NGINX: Denial of Service
+  via undisclosed requests when ngx_mail_auth_http_module is enabled
+- Resolves: RHEL-157892 - CVE-2026-32647 nginx: NGINX: Denial of Service
+  or Code Execution via specially crafted MP4 files
 
 * Tue Feb 17 2026 Luboš Uhliarik <luhliari@redhat.com> - 1:1.24.0-6
 - Resolves: RHEL-146529 -  CVE-2026-1642 nginx: NGINX: Data injection via
