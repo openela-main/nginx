@@ -56,7 +56,7 @@
 Name:              nginx
 Epoch:             1
 Version:           1.24.0
-Release:           9%{?dist}.1
+Release:           9%{?dist}.4
 
 Summary:           A high performance web server and reverse proxy server
 # BSD License (two clause)
@@ -184,6 +184,31 @@ Patch23:           0025-Limited-the-number-of-pending-operations-per-request.pat
 # https://redhat.atlassian.net/browse/RHEL-286574
 # upstream patch - https://github.com/nginx/nginx/commit/f8a23425bd6840c4c36b4264edf576ba3646156f
 Patch24:           0026-Avoid-post-rewrite-URI-to-path-mapping-with-alias.patch
+
+# https://redhat.atlassian.net/browse/RHEL-309560
+# upstream patch - https://github.com/nginx/nginx/commit/2df48a501d0fb8212b7d39dffeeff5876332ba59
+Patch25:           0027-HTTP-2-reset-reusable-connection-status-on-stream-cr.patch
+
+# https://redhat.atlassian.net/browse/RHEL-309527
+# upstream patch - https://github.com/nginx/nginx/commit/e27f5fa84fe6e98505e70bc543b748747dad0a3b
+Patch26:           0028-HTTP-2-account-for-queued-frames-when-validating-WIN.patch
+
+# https://redhat.atlassian.net/browse/RHEL-309955
+# upstream patch - https://github.com/nginx/nginx/commit/1b723277
+#                - https://github.com/nginx/nginx/commit/c51ffa2
+Patch27:           0029-Request-body-explicit-handling-of-NGX_AGAIN.patch
+
+# https://redhat.atlassian.net/browse/RHEL-309943
+# upstream patch - https://github.com/nginx/nginx/commit/e505109a3f21074bf0414eb8241a37085d2da8cb
+#                - https://github.com/nginx/nginx/commit/754fe68c2e0f698baf731666e71b7f2619c715ef
+#                - https://github.com/nginx/nginx/commit/a22ab710562492f3d18f50d4cbf28bc952956b61
+#                - https://github.com/nginx/nginx/commit/013ce187965496fd1a3f7d51ad5477a5573c09b7
+#                - https://github.com/nginx/nginx/commit/1d1d861a5e30026c9b76f0760e616847a7601422
+Patch30:           0030-Mail-updated-ngx_mail_send-to-set-handlers-on-s-quit.patch
+
+# https://redhat.atlassian.net/browse/RHEL-309733
+# upstream patch - https://github.com/nginx/nginx/commit/e39708edc69a9c0c992b6af075db761946969534
+Patch31:           0031-Resolver-fix-non-current-resolve-finalization-from-r.patch
 
 BuildRequires:     make
 BuildRequires:     gcc
@@ -697,6 +722,22 @@ fi
 
 
 %changelog
+* Thu Nov 19 2026 Luboš Uhliarik <luhliari@redhat.com> - 1:1.24.0-9.4
+- Resolves: RHEL-309733 - nginx: NGINX use-after-free condition in the
+  resolver (CVE-2026-123634)
+
+* Thu Nov 19 2026 Luboš Uhliarik <luhliari@redhat.com> - 1:1.24.0-9.3
+- Resolves: RHEL-309955 - nginx: nginx: Denial of Service via crafted TLS
+  connection (CVE-2026-118899)
+- Resolves: RHEL-309943 - nginx: NGINX use-after-free in worker process.
+  in the mail proxy server (CVE-2026-113425)
+
+* Wed Nov 18 2026 Luboš Uhliarik <luhliari@redhat.com> - 1:1.24.0-9.2
+- Resolves: RHEL-309560 - nginx: NGINX ngx_http_v2_module
+  vulnerability (CVE-2026-123633)
+- Resolves: RHEL-309527 - nginx: NGINX ngx_http_v2_module
+  vulnerability (CVE-2026-123007)
+
 * Sat Oct 31 2026 Luboš Uhliarik <luhliari@redhat.com> - 1:1.24.0-9.1
 - Resolves: RHEL-286574 - nginx:1.24/nginx: nginx: heap-based buffer overflow
   in ngx_http_core_module via alias with rewrite referencing
